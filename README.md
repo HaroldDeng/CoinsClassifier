@@ -7,3 +7,4 @@ An A.I. project for CSCI 4962
 ## Libraries
 - python 3 tkinter
 - python 3 tensorflow
+- python 3 openCV
