@@ -11,8 +11,8 @@ iname = argv[1]
 
 # read the frame
 frame = cv2.imread(iname)
-for i in range(10, 110, 10):
-	radSym = RadSymTransform(i)
+for i in range(10, 110, 20):
+	radSym = RadSymTransform(i, minval=10)
 
 	grayImg = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	frame = radSym(grayImg)

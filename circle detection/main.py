@@ -44,7 +44,7 @@ with Webcam(0) as cap:
 			# ay = cv2.convertScaleAbs(dy)
 			# grad = cv2.addWeighted(ax, 0.5, ay, 0.5, 0)
 			# frame = ay
-			frame = radSym(grayImg)
+			#frame = radSym(grayImg)
 			window.show(frame)
 			k = cv2.waitKey(10)
 			# Press q to break

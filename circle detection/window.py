@@ -1,5 +1,6 @@
 import cv2
 
+
 class ImageWindow(object):
 	def __init__(self, name: str):
 		self.name = name
@@ -28,3 +29,31 @@ class ImageWindow(object):
 	
 	def show(self, frame):
 		cv2.imshow(self.name, frame)
+	
+	def trackbar(self, name: str, value: int, count: int) -> 'Trackbar':
+		return Trackbar(name, self.name, value, count)
+
+
+class Trackbar(object):
+	def __init__(self, name: str, winname: str, value: int, count: int):
+		self.name = name
+		self.winname = winname
+		self.count = count
+		cv2.createTrackbar(name, winname, value, count, self._onUpdate)
+	
+	def _onUpdate(self, value: int):
+		print(f"Trackbar {self.name} updated to {value}")
+	
+	@property
+	def value(self) -> int:
+		return cv2.getTrackbarPos(self.name, self.winname)
+	
+	@value.setter
+	def value(self, val: int):
+		cv2.setTrackbarMax(self.name, self.winname, val)
+
+	def __int__(self) -> int:
+		return self.value
+	
+	def __float__(self) -> float:
+		return float(self.value) / self.count
