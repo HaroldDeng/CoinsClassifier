@@ -31,12 +31,13 @@ with Webcam(0) as cap:
 			# Try hough transform
 			grayImg = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 			circles = findCircles(grayImg)
-			circles = np.uint16(np.around(circles))
-			for x, y, rad in circles[0,:]:
-				# draw the outer circle
-				cv2.circle(frame, (x, y), rad, (0,255,0), 2)
-				# draw the center of the circle
-				cv2.circle(frame, (x, y), 2, (0,0,255), 3)
+			if circles is not None:
+				circles = np.uint16(np.around(circles))
+				for x, y, rad in circles[0,:]:
+					# draw the outer circle
+					cv2.circle(frame, (x, y), rad, (0,255,0), 2)
+					# draw the center of the circle
+					cv2.circle(frame, (x, y), 2, (0,0,255), 3)
 			
 			# dx = cv2.Sobel(grayImg, cv2.CV_16S, 1, 0, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
 			# dy = cv2.Sobel(grayImg, cv2.CV_16S, 0, 1, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
