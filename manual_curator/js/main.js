@@ -128,11 +128,11 @@ class Curator {
     }
     async submit() {
         const type = this.type;
-        const face = this.face;
-        if (type === undefined || (type != 'X' && face === undefined)) {
-            alert('Not defined');
+        let face = this.face;
+        if (type == 'X' && face === undefined)
+            face = 'X';
+        if (type === undefined || face === undefined)
             return;
-        }
         this.reset();
         await this.query('/api/label', 'POST', { name: this.imgId, type, face, user: this.user });
         await this.advance();
