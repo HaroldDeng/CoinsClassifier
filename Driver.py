@@ -8,7 +8,7 @@ class GUI:
 
         self.root.title('A.I. Project')
 
-        msg = Label(self.root, text="If you see this, your tkinter library is fine.",
+        msg = Label(self.root, text="If you see this, you are good",
                     font=("Arial", 16))
 
         def onClick():
