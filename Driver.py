@@ -8,7 +8,7 @@ class GUI:
 
         self.root.title('A.I. Project')
 
-        msg = Label(self.root, text="If you see this, you are good",
+        msg = Label(self.root, text="If you see this, you are ok",
                     font=("Arial", 16))
 
         def onClick():
