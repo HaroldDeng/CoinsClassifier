@@ -23,9 +23,10 @@ with ImageWindow('a') as window:
 
 	#do the blur operations once instead of every frame
 	origframe = cv2.imread(iname)
-	oframe = cv2.medianBlur(origframe, 17)
-	oframe = cv2.GaussianBlur(oframe, (17, 17), 0)
-
+	#oframe = cv2.medianBlur(origframe, 17)
+	oframe = cv2.pyrMeanShiftFiltering(origframe, 31, 61)
+	oframe = cv2.GaussianBlur(oframe, (13, 13), 0)
+	
 	while window.isOpen():
 		frame = oframe.copy()
 
@@ -40,7 +41,7 @@ with ImageWindow('a') as window:
 		#frame = cv2.Canny(frame, 6, 3)
 		#frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
 
-		circles = cv2.HoughCircles(grayImg, cv2.HOUGH_GRADIENT, int(dp), int(minDist), param1=50, param2=int(accumThresh), minRadius=int(minRad))
+		circles = cv2.HoughCircles(grayImg, cv2.HOUGH_GRADIENT, int(dp), int(minDist), param1=50, param2=int(accumThresh), minRadius=int(minRad), maxRadius=int(int(minRad)*2))
 
 		if circles is not None:
 			circles = np.uint16(np.around(circles))
