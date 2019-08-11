@@ -5,6 +5,7 @@ import numpy as np
 from window import ImageWindow
 from circle import HoughCircleTransform
 from sys import argv
+from time import time
 
 # create an overlay image. You can use any image
 background = np.ones((100,100,3),dtype='uint8')*255
@@ -36,11 +37,12 @@ with ImageWindow('a') as window:
 		#grayImg = cv2.adaptiveThreshold(grayImg, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 21, 1)
 
 		#below can be helpful to see what HoughCircles sees
-		#frame = grayImg
-		#frame = cv2.Canny(frame, 6, 3)
-		#frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
+		# frame = cv2.Canny(frame, 6, 3)
+		grayImg = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
 
+		t0 = time()
 		circles = cv2.HoughCircles(grayImg, cv2.HOUGH_GRADIENT, int(dp), int(minDist), param1=50, param2=int(accumThresh), minRadius=int(minRad))
+		t1 = time()
 
 		if circles is not None:
 			circles = np.uint16(np.around(circles))
@@ -51,6 +53,12 @@ with ImageWindow('a') as window:
 				cv2.circle(frame, (x, y), 2, (0,0,255), 3)
 		else:
 			print("no circ found")
+		t2 = time()
+
+		print(f'hough={t1 - t0}, circles={t2 - t1} ({(t2 - t1) / (1 if circles is None else len(circles))}')
+		
+		w0, h0 = frame.shape[:2]
+		frame = cv2.resize(frame, (int(400 * h0 / w0), 400))
 		window.show(frame)
 		if cv2.waitKey(1) == ord('q'):
 			break
