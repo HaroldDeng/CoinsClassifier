@@ -6,7 +6,7 @@ import pathlib as pl
 import numpy as np
 import cv2
 
-coin_onehot,assigns = {
+coin_onehot_assigns = {
 	'penny_head'  : np.array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
 	'penny_tail'  : np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
 	'nickel_head' : np.array([0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]),
@@ -54,4 +54,31 @@ def read_directories(dirroot):
 	return out
 
 def apply_region_info(im_re_dict):
-	pass
+	"output a list of numpy arrays with region info applied"
+	# read images -> dict of filename to numpy array
+	# read regions csv for data -> list of dict's
+	# apply crop and resize per images -> list of numpy array
+	images = im_re_dict["images"]
+	arrays = { img.name: cv2.imread(str(img),cv2.IMREAD_COLOR) for img in images}
+	regions_fn = im_re_dict["regions"]
+	region_info = []
+	with regions_fn.open() as f:
+		rdr = csv.DictReader(f)
+		for row in rdr:
+			shape_attr = json.loads(row['region_shape_attributes'])
+			row_pr = { "filename": row['#filename'], "resize": shape_attr }
+			region_info.append(row_pr)
+	cropped_images = []
+	for ri in region_info:
+		fn = ri["filename"]
+		resize = ri["resize"]
+		rx = resize["x"]
+		ry = resize["y"]
+		rw = resize["width"]
+		rh = resize["height"]
+		if fn in arrays:
+			arr = arrays[fn].copy()
+			cropped_images.append(cv2.resize(arr[rx:rw, ry:rh, :], (256,256)))
+	return cropped_images
+
+# next step: stack arrays, and track the accumulation to generate the outputs array for the other "side" of the training data sent to keras' fit method
