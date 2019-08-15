@@ -81,4 +81,13 @@ def apply_region_info(im_re_dict):
 			cropped_images.append(cv2.resize(arr[rx:rw, ry:rh, :], (256,256)))
 	return cropped_images
 
+# optional step: rotations, changing hue, etc.
 # next step: stack arrays, and track the accumulation to generate the outputs array for the other "side" of the training data sent to keras' fit method
+
+def accum_stacked_arrays(hierarchy,other_steps=(lambda x: [x])):
+	"returns tuple of 2 numpy arrays, first is training input, and second is expected outputs"
+	non_coin_imgs = apply_region_info(
+	for k0 in hierarchy:
+		pass
+			
+	

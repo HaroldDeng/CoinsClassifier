@@ -60,7 +60,7 @@ def model_fit(model,coin_training,coin_onehot,epochs,val_dat):
 		coin_training,
 		coin_onehot, #todo: what does "naming output layers" mean?
 		epochs=epochs,
-		validation_split=0.1
+		validation_split=0.1 # consider shuffling coin_training along axis
 	)
 
 
