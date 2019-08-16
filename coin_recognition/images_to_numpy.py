@@ -68,7 +68,7 @@ def apply_region_info(im_re_dict):
 			shape_attr = json.loads(row['region_shape_attributes'])
 			row_pr = {
 				"filename": row['#filename'],
-				"resize": shape_attr
+				"resize": shape_attr,
 				"region_id": row["region_id"]
 			}
 			region_info.append(row_pr)
