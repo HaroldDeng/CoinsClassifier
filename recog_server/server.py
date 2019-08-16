@@ -34,8 +34,9 @@ def analyze_image():
 	print('0')
 	blob = request.files['image']
 	print('a')
-	arr = np.array(blob.read())
-	image = cv2.imdecode(arr, 1) # convert to color image
+	blob.save('./upload.png')
+	image = cv2.imread('./upload.png')
+	os.remove('./upload.png')
 
 	frames = []
 	try:
