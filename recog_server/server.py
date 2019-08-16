@@ -1,8 +1,10 @@
 import argparse
 from flask import Flask, request, send_from_directory
 from circle_in import crop_circles
+from coin_recognition.test_web as tw
 import cv2
 import numpy as np
+import time
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-p', '--port', default=8080, help='port to start server on', type=int)
@@ -38,9 +40,10 @@ def analyze_image():
 	def write_callback(frame, i, x, y, r, **kwargs):
 		result.append({'x': x, 'y': y, 'width': r, 'height': r, })
 		fname = dst.format_map({'src': src, 'i': i, 'x': x, 'y': y, 'r': r, 'radius': r})
+		cv2.imwrite(frame, f'./tmp/gen_{i}.jpg')
 	crop_circles(image, write_callback)
-
-	return '[]', 200, { 'Content-type': 'application/json' }
+	cents = tw.main('./tmp')
+	return f'{"value":{cents}}', 200, { 'Content-type': 'application/json' }
 
 
 if __name__ == "__main__":
