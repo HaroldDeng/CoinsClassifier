@@ -9,7 +9,8 @@ Labeling
 
 Preprocessing/ Masking
 - Downsizing images to 224 x 224 pixels for Neural net (ResNet18)
-- Apply filters, increases contrast between coins and background. Pyramid mean shift and gaussian blur are being used
+- Apply transforms to images including center crop and normalization
+- For test input image, apply filters, increases contrast between coins and background. Pyramid mean shift and gaussian blur are being used
 
 Model Hyperparameters
 - Batch size 32
