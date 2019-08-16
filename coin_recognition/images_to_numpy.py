@@ -6,22 +6,22 @@ import pathlib as pl
 import numpy as np
 import cv2
 
-coin_onehot_assigns = {
-	'penny_head'  : np.array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
-	'penny_tail'  : np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
-	'nickel_head' : np.array([0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]),
-	'nickel_tail' : np.array([0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]),
-	'dime_head'   : np.array([0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]),
-	'dime_tail'   : np.array([0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]),
-	'quarter_head': np.array([0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]),
-	'quarter_tail': np.array([0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]),
-	'dollar_head' : np.array([0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]),
-	'dollar_tail' : np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]),
-	'not_us_coin' : np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]),
-}
+# coin_onehot_assigns = {
+# 	'penny_head'  : np.array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+# 	'penny_tail'  : np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+# 	'nickel_head' : np.array([0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]),
+# 	'nickel_tail' : np.array([0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]),
+# 	'dime_head'   : np.array([0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]),
+# 	'dime_tail'   : np.array([0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]),
+# 	'quarter_head': np.array([0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]),
+# 	'quarter_tail': np.array([0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]),
+# 	'dollar_head' : np.array([0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]),
+# 	'dollar_tail' : np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]),
+# 	'not_us_coin' : np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]),
+# }
 
-# goal: accumulate the date of the nested directories as a numpy array of shape:
-# (num_images,256,256,3) where num_images is the number of cropped images
+
+# new goal: process images with region info, then output to new nested directory structure
 
 def read_directories(dirroot):
 	out = {
@@ -38,9 +38,9 @@ def read_directories(dirroot):
 		           "tail":{"images":[],"regions":None}},
 	}
 	for s0 in pl.Path(dirroot).iterdir():
-		if s0.isdir():
+		if s0.is_dir():
 			for s1 in s0.iterdir():
-				if s1.isdir():
+				if s1.is_dir():
 					for s2 in s1.iterdir():
 						if s2.suffix == '.jpg':
 							out[s0.name][s1.name]["images"].append(s2)
@@ -59,16 +59,19 @@ def apply_region_info(im_re_dict):
 	# read regions csv for data -> list of dict's
 	# apply crop and resize per images -> list of numpy array
 	images = im_re_dict["images"]
-	arrays = { img.name: cv2.imread(str(img),cv2.IMREAD_COLOR) for img in images}
-	regions_fn = im_re_dict["regions"]
+	parent = images[0].parent
+	arrays = {img: cv2.imread(str(img),cv2.IMREAD_COLOR) for img in images}
+	regions_file = im_re_dict["regions"]
 	region_info = []
-	with regions_fn.open() as f:
-		rdr = csv.DictReader(f)
-		for row in rdr:
+	with regions_file.open() as f:
+		for row in csv.DictReader(f):
 			shape_attr = json.loads(row['region_shape_attributes'])
-			row_pr = { "filename": row['#filename'], "resize": shape_attr }
+			row_pr = {
+				"filename": row['#filename'],
+				"resize": shape_attr
+				"region_id": row["region_id"]
+			}
 			region_info.append(row_pr)
-	cropped_images = []
 	for ri in region_info:
 		fn = ri["filename"]
 		resize = ri["resize"]
@@ -76,18 +79,21 @@ def apply_region_info(im_re_dict):
 		ry = resize["y"]
 		rw = resize["width"]
 		rh = resize["height"]
-		if fn in arrays:
-			arr = arrays[fn].copy()
-			cropped_images.append(cv2.resize(arr[rx:rw, ry:rh, :], (256,256)))
-	return cropped_images
+		res_f = parent / fn
+		if res_f in arrays:
+			arr = arrays[res_f].copy()
+			arr_pr = cv2.resize(arr[rx:rw, ry:rh, :], (256,256))
+			reg_id = ri["region_id"]
+			new_f = str(parent) + res_f.stem + str(reg_id) + res_f.suffix
+			cv2.imwrite(new_f, arr_pr)
 
-# optional step: rotations, changing hue, etc.
-# next step: stack arrays, and track the accumulation to generate the outputs array for the other "side" of the training data sent to keras' fit method
+def recourse_mapped_dirs(hier):
+	for _, v in hier.items():
+		if "head" in v and "tail" in v:
+			for _, im_re in v.items():
+				apply_region_info(im_re)
+		elif "images" in v and "regions" in v:
+			apply_region_info(v)
 
-def accum_stacked_arrays(hierarchy,other_steps=(lambda x: [x])):
-	"returns tuple of 2 numpy arrays, first is training input, and second is expected outputs"
-	non_coin_imgs = apply_region_info(
-	for k0 in hierarchy:
-		pass
 			
 	
