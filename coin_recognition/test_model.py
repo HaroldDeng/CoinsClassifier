@@ -36,8 +36,8 @@ def main(args):
 
     model = load_model('classifier.pth',test_dset,dtype)
     test_acc, cents = check_accuracy(model, test_loader, dtype)
-    print("test accuracy", test_acc,"%")
-    print("number of cents in image",cents)
+#    print("test accuracy", test_acc,"%")
+    print("how much money? $",float(cents)/100)
 
 def load_model(checkpoint_path,test_dset,dtype):
     chpt = torch.load(checkpoint_path)
@@ -48,7 +48,7 @@ def load_model(checkpoint_path,test_dset,dtype):
     
     num_classes = len(test_dset.classes)
     print(test_dset.classes)
-    model.fc = nn.Linear(model.fc.in_features, num_classes)
+    model.fc = nn.Linear(model.fc.in_features, 5)
 
     model.type(dtype)
     loss_fn = nn.CrossEntropyLoss().type(dtype)
@@ -70,7 +70,7 @@ def check_accuracy(model, loader, dtype):
   model.eval()
   model.cuda()
   num_correct, num_samples = 0, 0
-  num_dime, num_nickel, num_penny, num_quarter = 0, 0, 0, 0
+  num_dime, num_nickel, num_non, num_penny, num_quarter = 0, 0, 0, 0,0
   i = 0
   
   for x, y in loader:
@@ -79,14 +79,19 @@ def check_accuracy(model, loader, dtype):
     _, preds = scores.data.cpu().max(1)
     num_dime += (preds==0).sum()
     num_nickel += (preds==1).sum()
-    num_penny += (preds==2).sum()
-    num_quarter += (preds==3).sum()
+    num_non += (preds==2).sum()
+    num_penny += (preds==3).sum()
+    num_quarter += (preds==4).sum()
     
     num_correct += (preds == y).sum()
     num_samples += x.size(0)
   cents = float(num_dime)*10+float(num_nickel)*5+float(num_penny)+float(num_quarter)*25
+  print("non-us coins:", int(num_non))
   acc = float(num_correct) / num_samples*100
-
+  print("dimes:",int(num_dime))
+  print("nickel:",int(num_nickel))
+  print("penny:",int(num_penny))
+  print("quarter:",int(num_quarter))
   return acc, cents
 
 if __name__ == '__main__':
