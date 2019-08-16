@@ -79,24 +79,25 @@ if __name__ == "__main__":
 	from argparse import ArgumentParser
 
 	parser = ArgumentParser()
+	parser.add_argument('--srcdir', default='.', help='output dir', type=str)
 	parser.add_argument('--src', required=True, help='image to input', type=str)
+	parser.add_argument('--dstdir', default='.', help='output dir', type=str)
 	parser.add_argument('--dst', default='{src}_crop{i}_{x}x{y}_{r}.jpg', help='output', type=str)
 	args = parser.parse_args()
 
 	src: str = args.src
 	dst: str = args.dst
 
-	frame = cv2.imread(src)
-	wframe = frame.copy()
+	frame = cv2.imread(args.srcdir + '/' + src)
+	# wframe = frame.copy()
 
 	def write_callback(frame, i, x, y, r, **kwargs):
 		fname = dst.format_map({'src': src, 'i': i, 'x': x, 'y': y, 'r': r, 'radius': r})
-		cv2.imwrite(fname, frame)
+		cv2.imwrite(args.dstdir + '/' + fname, frame)
 		# draw the outer circle
-		cv2.circle(wframe, (x, y), r, (0, 255, 0), 5)
+		# cv2.circle(wframe, (x, y), r, (0, 255, 0), 5)
 		# draw the center of the circle
-		cv2.circle(wframe, (x, y), 2, (0, 0, 255), 6)
+		# cv2.circle(wframe, (x, y), 2, (0, 0, 255), 6)
 	
-	frame = cv2.imread(src)
 	crop_circles(frame, write_callback)
-	cv2.imwrite(dst, wframe)
+	# cv2.imwrite(dst, wframe)
