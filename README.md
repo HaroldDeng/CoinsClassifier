@@ -30,8 +30,8 @@ Model Hyperparameters
 - OpenCV 3
 
 ## Links
-- Project Repository: https://github.com/HaroldDeng/CoinsClassifier.git
-- Labeled Image Repository: https://github.com/HaroldDeng/Object_Recognition_Coins_Dataset_U.S..git
+- [Project Repository](https://github.com/HaroldDeng/CoinsClassifier.git)
+- [Labeled Image Repository](https://github.com/HaroldDeng/Object_Recognition_Coins_Dataset_U.S..git)
 
 ## Keywords
 -pyramid mean shift
