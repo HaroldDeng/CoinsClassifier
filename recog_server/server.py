@@ -47,7 +47,7 @@ def analyze_image():
 	def write_callback(frame, i, x, y, r, **kwargs):
 		result.append({'x': x, 'y': y, 'width': r, 'height': r, })
 		fname = dst.format_map({'src': src, 'i': i, 'x': x, 'y': y, 'r': r, 'radius': r})
-		cv2.imwrite(frame, f'./tmp/gen_{i}.jpg')
+		cv2.imwrite(frame, f'./tmp/gen_{}.jpg'.format(i))
 	crop_circles(image, write_callback)
 	cents = tw.main('./tmp')
 	shutil.rmtree('./tmp', ignore_errors=True)
