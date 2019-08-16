@@ -2,37 +2,37 @@ import torch
 import torchvision
 from torchvision.datasets import ImageFolder
 import argparse
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader, Dataset
 import torch.nn as nn
 import torchvision.transforms as T
 from torch.autograd import Variable
 '''
 to run: python test_model.py --test_dir ~/cv/coins/test --use_gpu
 '''
-parser = argparse.ArgumentParser()
-parser.add_argument('--test_dir', default='coins/test')
-parser.add_argument('--batch_size', default=32, type=int)
-parser.add_argument('--num_workers', default=4, type=int)
+#parser = argparse.ArgumentParser()
+#parser.add_argument('--test_dir', default='coins/test')
+#parser.add_argument('--batch_size', default=32, type=int)
+#parser.add_argument('--num_workers', default=4, type=int)
 #parser.add_argument('--num_epochs1', default=10, type=int)
 #parser.add_argument('--num_epochs2', default=10, type=int)
-parser.add_argument('--use_gpu', action='store_true')
+#parser.add_argument('--use_gpu', action='store_true')
 
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
 
-def main(args):
-    dtype = torch.FloatTensor
-    if args.use_gpu:
-      dtype = torch.cuda.FloatTensor
+def main(folder):
+    #dtype = torch.FloatTensor
+    #if args.use_gpu:
+    dtype = torch.cuda.FloatTensor
     
     val_transform = T.Compose([
-    T.Scale(224),
+    T.Resize(224),
     T.CenterCrop(224),
     T.ToTensor(),
     T.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
   ])
-    test_dset = ImageFolder(args.test_dir, transform=val_transform)
-    test_loader = DataLoader(test_dset, batch_size=args.batch_size, num_workers=args.num_workers)
+    test_dset = ImageFolder(folder, transform=val_transform)
+    test_loader = DataLoader(test_dset, batch_size=32, num_workers=4)
 
     model = load_model('classifier.pth',test_dset,dtype)
     test_acc, cents = check_accuracy(model, test_loader, dtype)
@@ -75,7 +75,7 @@ def check_accuracy(model, loader, dtype):
   i = 0
   
   for x, y in loader:
-    x_var = Variable(x.type(dtype), volatile=True)
+    x_var = Variable(x.type(dtype))
     scores = model(x_var)
     _, preds = scores.data.cpu().max(1)
     num_dime += (preds==0).sum()
@@ -96,6 +96,6 @@ def check_accuracy(model, loader, dtype):
   return acc, cents
 
 if __name__ == '__main__':
-  args = parser.parse_args()
-  main(args)
+  #args = parser.parse_args()
+  main(folder)
   
