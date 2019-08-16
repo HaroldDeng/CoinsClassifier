@@ -36,9 +36,9 @@ coins/
 """
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--train_dir', default='coins/train')
-parser.add_argument('--val_dir', default='coins/vali')
-parser.add_argument('--test_dir', default='coins/test')
+parser.add_argument('--train_dir', default='~/cv/coins/train')
+parser.add_argument('--val_dir', default='~/cv/coins/vali')
+parser.add_argument('--test_dir', default='~/cv/coins/test')
 parser.add_argument('--batch_size', default=32, type=int)
 parser.add_argument('--num_workers', default=4, type=int)
 parser.add_argument('--num_epochs1', default=10, type=int)
@@ -56,9 +56,9 @@ def main(args):
     dtype = torch.cuda.FloatTensor
 
   train_transform = T.Compose([
-    T.Scale(256),
-    T.RandomSizedCrop(224),
-    T.RandomHorizontalFlip(),
+    T.Scale(224),
+    T.CenterCrop(224),
+   # T.RandomHorizontalFlip(),
     T.ToTensor(),
     T.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
   ])
@@ -85,6 +85,8 @@ def main(args):
   model = torchvision.models.resnet18(pretrained=True)
 
   num_classes = len(train_dset.classes)
+  class_names =train_dset.classes 
+  print(class_names)
   model.fc = nn.Linear(model.fc.in_features, num_classes)
 
   model.type(dtype)
@@ -122,6 +124,13 @@ def main(args):
     print('Train accuracy: ', train_acc)
     print('Val accuracy: ', val_acc)
     print()
+  
+  model.class_to_idx = train_dset.class_to_idx
+  model.cpu()
+  torch.save({'arch':'resnet',
+              'state_dict':model.state_dict(),
+              'class_to_idx':model.class_to_idx},
+              'classifier.pth')
 
   test_acc = check_accuracy(model, test_loader, dtype)
   print('Test accuracy :',test_acc)
@@ -132,6 +141,7 @@ def run_epoch(model, loss_fn, loader, optimizer, dtype):
   Train the model for one epoch.
   """
   model.train()
+  model.cuda()
 
   for x, y in loader:
     x_var = Variable(x.type(dtype))
@@ -148,6 +158,7 @@ def check_accuracy(model, loader, dtype):
   Check the accuracy of the model.
   """
   model.eval()
+  model.cuda()
   num_correct, num_samples = 0, 0
   i = 0
   for x, y in loader:
