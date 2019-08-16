@@ -28,9 +28,6 @@ class Webcam extends EventTarget{
         const track = stream.getVideoTracks()[0];
         await track.applyConstraints(this.constraints);
     }
-    get frameSize(): number {
-        
-    }
     async start() {
         this.stream = await navigator.mediaDevices.getUserMedia({ video: this.constraints, audio: false });
         console.log("Got stream", this.stream);
@@ -45,17 +42,21 @@ class Webcam extends EventTarget{
 }
 class VideoUI {
     readonly webcam = new Webcam();
+    readonly analysis = new AJAXAnalysisService();
     private ctx: CanvasRenderingContext2D | undefined;
-    dirty: boolean = false;
+    ready: boolean = false;
+
     protected nextFrame: number | undefined;
 
     constructor(readonly canvas: HTMLCanvasElement) {
         this.webcam.addEventListener('ready', this.onStream);
         window.addEventListener('resize', this.onResize);
+        canvas.addEventListener('click', this.onTap);
     }
     async start() {
         this.onResize();
         await this.webcam.start();
+        this.ready = true;
     }
     private onResize = () => {
         const { width, height } = this.canvas.getBoundingClientRect();
@@ -67,22 +68,23 @@ class VideoUI {
         if (this.nextFrame == undefined)
             this.run();
     }
+    private onTap = async () => {
+        if (!this.ready)
+            return;
+        
+        if (this.webcam.elem.paused) {
+            this.webcam.elem.play();
+            return;
+        }
+
+        this.webcam.elem.pause();
+        const data = await this.analysis.analyze(this.webcam.elem);
+    }
     run = () => {
         const ctx = this.ctx!;
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         ctx.drawImage(this.webcam.elem, 0, 0);
         this.nextFrame = requestAnimationFrame(this.run)
-    }
-    analyze = () => {
-        if (this.dirty) {
-            const ctx = this.ctx!;
-            ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            ctx.drawImage(this.webcam.elem, 0, 0);
-            this.dirty = false;
-        }
-        this.canvas.toBlob(blob => {
-
-        });
     }
     switch() {
         this.webcam.switch();
