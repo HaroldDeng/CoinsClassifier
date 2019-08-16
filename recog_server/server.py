@@ -34,7 +34,7 @@ def analyze_image():
 	blob = request.files['image']
 	print('a')
 	arr = np.array(blob.read())
-	image = cv2.imdecode(arr, cv2.CV_LOAD_IMAGE_COLOR)
+	image = cv2.imdecode(arr, 1) # convert to color image
 
 	frames = []
 	def write_callback(frame, i, x, y, r, **kwargs):
