@@ -35,8 +35,9 @@ def main(args):
     test_loader = DataLoader(test_dset, batch_size=args.batch_size, num_workers=args.num_workers)
 
     model = load_model('classifier.pth',test_dset,dtype)
-    test_acc = check_accuracy(model, test_loader, dtype)
-    print(test_acc)
+    test_acc, cents = check_accuracy(model, test_loader, dtype)
+    print("test accuracy", test_acc,"%")
+    print("number of cents in image",cents)
 
 def load_model(checkpoint_path,test_dset,dtype):
     chpt = torch.load(checkpoint_path)
@@ -46,6 +47,7 @@ def load_model(checkpoint_path,test_dset,dtype):
     model.class_to_idx = chpt['class_to_idx']
     
     num_classes = len(test_dset.classes)
+    print(test_dset.classes)
     model.fc = nn.Linear(model.fc.in_features, num_classes)
 
     model.type(dtype)
@@ -64,41 +66,28 @@ def load_model(checkpoint_path,test_dset,dtype):
     
     return model
 
-def calc_accuracy(model, data, cuda=False):
-    model.eval()
-    model.to(device='cuda')    
-    
-    with torch.no_grad():
-        for idx, (inputs, labels) in enumerate(dataloaders[data]):
-            if cuda:
-                inputs, labels = inputs.cuda(), labels.cuda()
-            # obtain the outputs from the model
-            outputs = model.forward(inputs)
-            # max provides the (maximum probability, max value)
-            _, predicted = outputs.max(dim=1)
-            # check the 
-            if idx == 0:
-                print(predicted) #the predicted class
-                print(torch.exp(_)) # the predicted probability
-            equals = predicted == labels.data
-            if idx == 0:
-                print(equals)
-            print(equals.float().mean())
-
 def check_accuracy(model, loader, dtype):
   model.eval()
   model.cuda()
   num_correct, num_samples = 0, 0
+  num_dime, num_nickel, num_penny, num_quarter = 0, 0, 0, 0
   i = 0
+  
   for x, y in loader:
     x_var = Variable(x.type(dtype), volatile=True)
     scores = model(x_var)
     _, preds = scores.data.cpu().max(1)
+    num_dime += (preds==0).sum()
+    num_nickel += (preds==1).sum()
+    num_penny += (preds==2).sum()
+    num_quarter += (preds==3).sum()
+    
     num_correct += (preds == y).sum()
     num_samples += x.size(0)
-  acc = float(num_correct) / num_samples
+  cents = float(num_dime)*10+float(num_nickel)*5+float(num_penny)+float(num_quarter)*25
+  acc = float(num_correct) / num_samples*100
 
-  return acc
+  return acc, cents
 
 if __name__ == '__main__':
   args = parser.parse_args()
