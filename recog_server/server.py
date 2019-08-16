@@ -45,12 +45,16 @@ def analyze_image():
 	except OSError:
 		pass
 	
+	frame_ct = 0
 	def write_callback(frame, i, x, y, r, **kwargs):
-		#result.append({'x': x, 'y': y, 'width': r, 'height': r, })
 		fname = dst.format_map({'src': src, 'i': i, 'x': x, 'y': y, 'r': r, 'radius': r})
 		cv2.imwrite(frame, './tmp/tmp/gen_{}.jpg'.format(i))
-	crop_circles(image, write_callback)
-	cents = tw.main('./tmp')
+		frame_ct += 1
+	if frame_ct == 0:
+		cents = 0
+	else:
+		crop_circles(image, write_callback)
+		cents = tw.main('./tmp')
 	shutil.rmtree('./tmp', ignore_errors=True)
 	return '{"value":{}}'.format(cents), 200, { 'Content-type': 'application/json' }
 
