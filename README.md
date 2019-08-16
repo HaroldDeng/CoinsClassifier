@@ -34,9 +34,9 @@ Model Hyperparameters
 - [Labeled Image Repository](https://github.com/HaroldDeng/Object_Recognition_Coins_Dataset_U.S..git)
 
 ## Keywords
--pyramid mean shift
--gaussian blur
--hough circles
--neural net
--cnn
--webapp
+- pyramid mean shift
+- gaussian blur
+- hough circles
+- neural net
+- cnn
+- webapp
