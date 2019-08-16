@@ -79,10 +79,15 @@ def apply_region_info(im_re_dict):
 		ry = resize["y"]
 		rw = resize["width"]
 		rh = resize["height"]
+		# print("{0} {1} {2} {3}".format(rx,ry,rw,rh))
 		res_f = parent / fn
+		#print(res_f)
 		if res_f in arrays:
 			arr = arrays[res_f].copy()
-			arr_pr = cv2.resize(arr[rx:rw, ry:rh, :], (256,256))
+			# print(arr.shape)
+			arr_pr = arr[ry:ry+rh, rx:rx+rw]
+			# print(arr_pr.shape)
+			arr_pr = cv2.resize(arr_pr, (256,256))
 			reg_id = ri["region_id"]
 			new_f = str(parent) + res_f.stem + str(reg_id) + res_f.suffix
 			cv2.imwrite(new_f, arr_pr)
