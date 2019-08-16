@@ -4,9 +4,10 @@ class WebcamReadyEvent extends Event {
     }
 }
 
-class Webcam extends EventTarget{
+class Webcam extends EventTarget {
     readonly elem = document.createElement('video');
     private stream: MediaStream | undefined;
+    private images: MLResult | undefined;
     private targetWidth: number = -1;
     private targetHeight: number = -1;
     constructor() {
@@ -79,6 +80,8 @@ class VideoUI {
 
         this.webcam.elem.pause();
         const data = await this.analysis.analyze(this.webcam.elem);
+        alert(`You have ${(data.value / 100).toFixed(2)}`);
+        this.webcam.elem.play();
     }
     run = () => {
         const ctx = this.ctx!;

@@ -1,32 +1,10 @@
-class WSAnalysisService extends EventTarget {
-	private readonly socket: WebSocket;
-	constructor() {
-		super();
-		this.socket = new WebSocket(`ws://${window.location.host}/api/echo`, ["coinv1"]);
-		this.socket.addEventListener('open', this.onOpen);
-		this.socket.addEventListener('message', this.onMessage);
-	}
-	private onOpen = (e: Event) => {
-		console.log(this.socket, e);
-	}
-	private onMessage = (e: MessageEvent) => {
-		console.log(e);
-	}
-}
-
-interface CoinAnnotation {
-    label: string;
-    accuracy: number;
-    top: number;
-    left: number;
-    width: number;
-    height: number;
+interface MLResult {
+	value: number;
 }
 
 class AJAXAnalysisService {
 	readonly canvas = document.createElement('canvas');
 	readonly ctx = this.canvas.getContext('2d')!;
-
 	
 	query(path: string, method: string = 'GET', data: Blob): Promise<XMLHttpRequest> {
 		// Create the XHR request
@@ -63,13 +41,13 @@ class AJAXAnalysisService {
 			request.send(form);
 		});
 	}
-	private async upload(png: Blob) {
+	private async upload(png: Blob): Promise<MLResult> {
 		const result = await this.query('/api/analysis', 'POST', png);
 		const data = result.response;
 		console.log(data);
 		return data;
 	}
-	async analyze(video: HTMLVideoElement) {
+	async analyze(video: HTMLVideoElement): Promise<MLResult> {
 		const { videoWidth: width, videoHeight: height } = video;
 		this.canvas.width = width;
 		this.canvas.height = height;
@@ -80,4 +58,3 @@ class AJAXAnalysisService {
 		return await this.upload(png);
 	}
 }
-(window as any)['Ana'] = WSAnalysisService;
